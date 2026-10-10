@@ -7,6 +7,10 @@
 	"authors": [
 		"mavethedave"
 	],
+	"contact": {
+		"issues": "https://github.com/mavethedave09-sudo/herdstead/issues",
+		"sources": "https://github.com/mavethedave09-sudo/herdstead"
+	},
 	"license": "MIT",
 	"icon": "assets/herdstead/icon.png",
 	"environment": "*",

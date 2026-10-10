@@ -112,6 +112,21 @@ animals will probably be blocked.
 If you find a conflict, please report it along with the other mod's name and
 version.
 
+## Reporting bugs
+
+Bugs, conflicts and suggestions go on the
+[issue tracker](https://github.com/mavethedave09-sudo/herdstead/issues). It
+helps a lot if you include:
+
+- the HerdStead, Minecraft and Fabric Loader versions
+- the other mods you have installed
+- what you expected to happen and what happened instead
+- your `logs/latest.log` (and `config/herdstead-species.json` if it is about
+  species or biome settings)
+
+If something seems slow, set `debugLogging` to `true` in
+`config/herdstead.json` and include the log from that run.
+
 ## License
 
 MIT. See the `LICENSE` file.
