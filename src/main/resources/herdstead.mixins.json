@@ -1,0 +1,17 @@
+{
+	"required": true,
+	"package": "com.mavethedave.herdstead.mixin",
+	"compatibilityLevel": "JAVA_25",
+	"mixins": [
+		"AnimalMixin",
+		"MobSpawnMixin",
+		"MobGoalMixin",
+		"MobFinalizeMixin"
+	],
+	"injectors": {
+		"defaultRequire": 1
+	},
+	"overwrites": {
+		"requireAnnotations": true
+	}
+}
