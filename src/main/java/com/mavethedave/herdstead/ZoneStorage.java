@@ -177,8 +177,7 @@ public class ZoneStorage extends SavedData {
         }
 
         Zone newZone = new Zone("Zone (" + playerChunkX + "," + playerChunkZ + ")", playerChunkX, playerChunkZ);
-        Holder<Biome> originBiome = level.getBiome(new BlockPos(
-                playerChunkX * 16 + 8, level.getSeaLevel(), playerChunkZ * 16 + 8));
+        Holder<Biome> originBiome = sampleChunkBiome(level, playerChunkX, playerChunkZ);
 
         GrowJob job = new GrowJob(newZone, originBiome);
         job.frontier.add(new int[]{playerChunkX, playerChunkZ});
@@ -210,8 +209,7 @@ public class ZoneStorage extends SavedData {
                 continue;
             }
 
-            BlockPos samplePos = new BlockPos(chunkX * 16 + 8, level.getSeaLevel(), chunkZ * 16 + 8);
-            if (level.getBiome(samplePos) != job.originBiome) {
+            if (sampleChunkBiome(level, chunkX, chunkZ) != job.originBiome) {
                 continue;
             }
 
@@ -264,8 +262,7 @@ public class ZoneStorage extends SavedData {
         if (!HerdsteadConfig.get().isEnabled(species.key)) {
             return 0;
         }
-        Holder<Biome> biome = level.getBiome(new BlockPos(
-                zone.originChunkX * 16 + 8, level.getSeaLevel(), zone.originChunkZ * 16 + 8));
+        Holder<Biome> biome = sampleChunkBiome(level, zone.originChunkX, zone.originChunkZ);
         String biomeId = biome.unwrapKey().map(key -> key.identifier().toString()).orElse("");
         int baseValue = species.biomePopulations.getOrDefault(biomeId, 0);
         if (baseValue <= 0) {
@@ -949,4 +946,20 @@ public class ZoneStorage extends SavedData {
             setDirty();
         }
     }
+
+    private static final Set<String> PASS_THROUGH_BIOMES = Set.of("streamsreflowing:stream");
+
+    static Holder<Biome> sampleChunkBiome(ServerLevel level, int chunkX, int chunkZ) {
+        int[][] offsets = {{8, 8}, {2, 2}, {14, 2}, {2, 14}, {14, 14}};
+        int y = level.getSeaLevel();
+        Holder<Biome> first = null;
+        for (int[] o : offsets) {
+            Holder<Biome> biome = level.getBiome(new BlockPos(chunkX * 16 + o[0], y, chunkZ * 16 + o[1]));
+            if (first == null) first = biome;
+            String id = biome.unwrapKey().map(k -> k.identifier().toString()).orElse("");
+            if (!PASS_THROUGH_BIOMES.contains(id)) return biome;
+        }
+        return first; // whole chunk is stream
+    }
+
 }
