@@ -948,18 +948,47 @@ public class ZoneStorage extends SavedData {
     }
 
     private static final Set<String> PASS_THROUGH_BIOMES = Set.of("streamsreflowing:stream");
+    private static final Set<String> CAVE_BIOMES = Set.of(
+            "minecraft:lush_caves", "minecraft:dripstone_caves", "minecraft:deep_dark");
+    private static final int[][] SAMPLE_OFFSETS = {{8, 8}, {2, 2}, {14, 2}, {2, 14}, {14, 14}};
+    private static final int[] SURFACE_PROBE_HEIGHTS_ABOVE_SEA = {0, 40, 80, 140};
 
-    static Holder<Biome> sampleChunkBiome(ServerLevel level, int chunkX, int chunkZ) {
-        int[][] offsets = {{8, 8}, {2, 2}, {14, 2}, {2, 14}, {14, 14}};
-        int y = level.getSeaLevel();
-        Holder<Biome> first = null;
-        for (int[] o : offsets) {
-            Holder<Biome> biome = level.getBiome(new BlockPos(chunkX * 16 + o[0], y, chunkZ * 16 + o[1]));
-            if (first == null) first = biome;
-            String id = biome.unwrapKey().map(k -> k.identifier().toString()).orElse("");
-            if (!PASS_THROUGH_BIOMES.contains(id)) return biome;
+    private static String biomeId(Holder<Biome> biome) {
+        return biome.unwrapKey().map(k -> k.identifier().toString()).orElse("");
+    }
+
+    // The biome on the surface at x/z: climbs past cave biomes. Never loads chunks.
+    private static Holder<Biome> surfaceBiomeAt(ServerLevel level, int x, int z) {
+        Holder<Biome> biome = null;
+        for (int dy : SURFACE_PROBE_HEIGHTS_ABOVE_SEA) {
+            biome = level.getBiome(new BlockPos(x, level.getSeaLevel() + dy, z));
+            if (!CAVE_BIOMES.contains(biomeId(biome))) {
+                return biome;
+            }
         }
-        return first; // whole chunk is stream
+        return biome;
+    }
+
+    // The most common surface biome among 5 points in the chunk, so a thin stream crossing it doesn't decide.
+    static Holder<Biome> sampleChunkBiome(ServerLevel level, int chunkX, int chunkZ) {
+        Map<Holder<Biome>, Integer> counts = new HashMap<>();
+        Holder<Biome> best = null;
+        int bestCount = 0;
+        for (int[] o : SAMPLE_OFFSETS) {
+            Holder<Biome> biome = surfaceBiomeAt(level, chunkX * 16 + o[0], chunkZ * 16 + o[1]);
+            if (PASS_THROUGH_BIOMES.contains(biomeId(biome))) {
+                continue;
+            }
+            int count = counts.merge(biome, 1, Integer::sum);
+            if (count > bestCount) {
+                best = biome;
+                bestCount = count;
+            }
+        }
+        if (best == null) {
+            best = surfaceBiomeAt(level, chunkX * 16 + 8, chunkZ * 16 + 8);
+        }
+        return best;
     }
 
 }
