@@ -6,7 +6,8 @@
 		"AnimalMixin",
 		"MobSpawnMixin",
 		"MobGoalMixin",
-		"MobFinalizeMixin"
+		"MobFinalizeMixin",
+		"StructureSpawnMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

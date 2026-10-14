@@ -253,9 +253,10 @@ public class ZoneStorage extends SavedData {
 
         addZone(newZone);
         long totalMillis = (System.nanoTime() - job.startNanos) / 1_000_000;
-        HerdStead.LOGGER.info("Created " + newZone.name + " with " + newZone.chunks.size()
-                + " chunks (grown over " + job.ticks + " ticks, " + totalMillis + " ms), edge buffer "
-                + (newZone.edgeBufferChunks * 16) + " blocks, " + herdsPlanned + " herd sites planned.");
+        HerdStead.LOGGER.info("Created " + newZone.name + " (" + biomeId(job.originBiome) + ") with "
+                + newZone.chunks.size() + " chunks (grown over " + job.ticks + " ticks, " + totalMillis
+                + " ms), edge buffer " + (newZone.edgeBufferChunks * 16) + " blocks, "
+                + herdsPlanned + " herd sites planned.");
     }
 
     public int calculateMaxPopulation(Zone zone, ServerLevel level, AnimalSpecies species) {
